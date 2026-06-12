@@ -1,1 +1,13 @@
-<p>join-form works!</p>
+<div class="join-container">
+  <h1>ChatWS</h1>
+  <form (ngSubmit)="join()">
+    <input
+      type="text"
+      [(ngModel)]="username"
+      name="username"
+      placeholder="Tu nombre..."
+      autocomplete="off"
+    />
+    <button type="submit" [disabled]="!username.trim()">Unirse</button>
+  </form>
+</div>
