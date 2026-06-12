@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timezone
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,9 +7,14 @@ from manager import ConnectionManager
 
 app = FastAPI()
 
+
+def get_cors_origins() -> list[str]:
+    return os.getenv("CORS_ORIGINS", "http://localhost:4200").split(",")
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

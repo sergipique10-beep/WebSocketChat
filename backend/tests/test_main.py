@@ -3,6 +3,18 @@ import pytest
 from fastapi.testclient import TestClient
 
 
+def test_cors_origins_default(monkeypatch):
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+    from main import get_cors_origins
+    assert get_cors_origins() == ["http://localhost:4200"]
+
+
+def test_cors_origins_from_env(monkeypatch):
+    monkeypatch.setenv("CORS_ORIGINS", "https://app.onrender.com,https://other.com")
+    from main import get_cors_origins
+    assert get_cors_origins() == ["https://app.onrender.com", "https://other.com"]
+
+
 @pytest.fixture
 def client():
     from main import app
