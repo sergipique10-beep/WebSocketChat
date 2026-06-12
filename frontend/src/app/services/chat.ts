@@ -1,12 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Message } from '../models/message.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class Chat implements OnDestroy {
   messages$ = new Subject<Message>();
-  connected$ = new Subject<boolean>();
+  connected$ = new BehaviorSubject<boolean>(false);
 
   private ws: WebSocket | null = null;
   private username = '';
