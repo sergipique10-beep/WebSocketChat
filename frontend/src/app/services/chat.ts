@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Message } from '../models/message.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class Chat implements OnDestroy {
@@ -33,7 +34,7 @@ export class Chat implements OnDestroy {
   }
 
   private openConnection(): void {
-    this.ws = new WebSocket(`ws://localhost:8000/ws/${this.username}`);
+    this.ws = new WebSocket(`${environment.wsUrl}/ws/${this.username}`);
 
     this.ws.onopen = () => this.connected$.next(true);
 
