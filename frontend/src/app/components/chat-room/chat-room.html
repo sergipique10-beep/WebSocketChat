@@ -1,0 +1,27 @@
+<div class="chat-container">
+  <div class="status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
+    {{ isConnected ? 'Conectado' : 'Desconectado — reconectando...' }}
+  </div>
+
+  <div class="messages">
+    @for (msg of messages; track msg.timestamp) {
+      <div class="message" [class.own]="msg.username === username">
+        <span class="author">{{ msg.username }}</span>
+        <span class="text">{{ msg.message }}</span>
+        <span class="time">{{ msg.timestamp | date:'HH:mm' }}</span>
+      </div>
+    }
+  </div>
+
+  <form class="input-area" (ngSubmit)="sendMessage()">
+    <input
+      type="text"
+      [(ngModel)]="newMessage"
+      name="message"
+      placeholder="Escribí un mensaje..."
+      [disabled]="!isConnected"
+      autocomplete="off"
+    />
+    <button type="submit" [disabled]="!newMessage.trim() || !isConnected">Enviar</button>
+  </form>
+</div>
