@@ -36,3 +36,11 @@ async def test_broadcast_sends_to_all_connections():
 async def test_broadcast_empty_connections_does_nothing():
     mgr = ConnectionManager()
     await mgr.broadcast("hello")  # should not raise
+    assert mgr.active_connections == []
+
+
+@pytest.mark.asyncio
+async def test_disconnect_unknown_connection_does_nothing():
+    mgr = ConnectionManager()
+    ws = AsyncMock()
+    mgr.disconnect(ws)  # ws was never connected — should not raise
