@@ -8,6 +8,28 @@
       placeholder="Tu nombre..."
       autocomplete="off"
     />
-    <button type="submit" [disabled]="!username.trim()">Unirse</button>
+
+    <p class="label">Elegí un tema para chatear:</p>
+    <div class="chips">
+      @for (af of aficiones; track af) {
+        <button
+          type="button"
+          class="chip"
+          [class.selected]="selectedRoom === af"
+          (click)="selectRoom(af)"
+        >{{ af }}</button>
+      }
+    </div>
+
+    <input
+      type="text"
+      [(ngModel)]="customRoom"
+      name="customRoom"
+      placeholder="O escribí tu propio tema..."
+      autocomplete="off"
+      (ngModelChange)="onCustomRoomChange()"
+    />
+
+    <button type="submit" [disabled]="!canJoin">Unirse</button>
   </form>
 </div>
