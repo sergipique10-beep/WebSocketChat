@@ -11,6 +11,7 @@ import { Message } from '../../models/message.model';
   standalone: true,
   imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './chat-room.html',
+  styleUrl: './chat-room.css'
 })
 export class ChatRoom implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);

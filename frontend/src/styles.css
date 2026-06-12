@@ -1,1 +1,61 @@
-/* You can add global styles to this file, and also import other style files */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #07060e;
+  --surface:   #110e1a;
+  --border:    #4a3728;
+  --gold:      #c9a84c;
+  --gold-light:#e8c97a;
+  --gold-dim:  #7a6230;
+  --red:       #8b1a1a;
+  --text:      #d4c5a9;
+  --text-dim:  #8a7d6b;
+  --ring-glow: rgba(201,168,76,0.25);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(139,26,26,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  min-height: 100vh;
+}
+
+input, button, textarea { font-family: 'Crimson Text', Georgia, serif; }
+
+input[type="text"],
+input[type="email"] {
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus {
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 3px var(--ring-glow);
+}
+
+input::placeholder { color: var(--text-dim); }
+input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+button { cursor: pointer; border: none; outline: none; transition: all 0.2s; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

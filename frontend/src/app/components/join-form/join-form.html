@@ -1,35 +1,59 @@
-<div class="join-container">
-  <h1>ChatWS</h1>
-  <form (ngSubmit)="join()">
-    <input
-      type="text"
-      [(ngModel)]="username"
-      name="username"
-      placeholder="Tu nombre..."
-      autocomplete="off"
-    />
+<div class="lotr-bg">
+  <div class="register-card">
 
-    <p class="label">Elegí un tema para chatear:</p>
-    <div class="chips">
-      @for (af of aficiones; track af) {
-        <button
-          type="button"
-          class="chip"
-          [class.selected]="selectedRoom === af"
-          (click)="selectRoom(af)"
-        >{{ af }}</button>
-      }
+    <div class="rune-border">
+      <div class="card-inner">
+        <div class="header">
+          <div class="eye-symbol">◉</div>
+          <h1 class="title">ChatWS</h1>
+          <p class="subtitle">Crónicas de la Tierra Media</p>
+          <div class="divider">— ⟐ —</div>
+        </div>
+
+        <p class="lore">
+          "Un Anillo para gobernarlos a todos,<br>
+          un Chat para encontrarlos."
+        </p>
+
+        <form (ngSubmit)="join()">
+          <div class="field">
+            <label>Tu nombre en la Comarca</label>
+            <input type="text" [(ngModel)]="username" name="username"
+              placeholder="Frodo, Aragorn, Legolas..." autocomplete="off"/>
+          </div>
+
+          <div class="field">
+            <label>Pergamino de contacto (correo)</label>
+            <input type="email" [(ngModel)]="email" name="email"
+              placeholder="heroe&#64;tierramedia.com" autocomplete="off"/>
+          </div>
+
+          <div class="field">
+            <label>Elige tu Concilio</label>
+            <div class="chips">
+              @for (af of aficiones; track af) {
+                <button type="button" class="chip"
+                  [class.selected]="selectedRoom === af"
+                  (click)="selectRoom(af)">
+                  {{ af }}
+                </button>
+              }
+            </div>
+            <input type="text" [(ngModel)]="customRoom" name="customRoom"
+              placeholder="O forja tu propio concilio..."
+              autocomplete="off" (ngModelChange)="onCustomRoomChange()"/>
+          </div>
+
+          @if (error()) {
+            <p class="error-msg">⚠ {{ error() }}</p>
+          }
+
+          <button type="submit" class="btn-join" [disabled]="!canJoin">
+            @if (loading()) { Invocando... } @else { Unirse al Concilio }
+          </button>
+        </form>
+      </div>
     </div>
 
-    <input
-      type="text"
-      [(ngModel)]="customRoom"
-      name="customRoom"
-      placeholder="O escribí tu propio tema..."
-      autocomplete="off"
-      (ngModelChange)="onCustomRoomChange()"
-    />
-
-    <button type="submit" [disabled]="!canJoin">Unirse</button>
-  </form>
+  </div>
 </div>
