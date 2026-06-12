@@ -19,6 +19,7 @@
       <span class="status" [class.connected]="isConnected()" [class.disconnected]="!isConnected()">
         {{ isConnected() ? '● Conectado' : '○ Reconectando...' }}
       </span>
+      <button class="btn-leave" (click)="leave()">Abandonar</button>
     </div>
 
     <div class="messages">

@@ -12,13 +12,12 @@ export class Chat implements OnDestroy {
   private username = '';
   private room = '';
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  private intentionalDisconnect = false;
 
   connect(username: string, room: string): void {
-    this.disconnect();
+    this.clearReconnect();
+    this.closeWs();
     this.username = username;
     this.room = room;
-    this.intentionalDisconnect = false;
     this.openConnection();
   }
 
@@ -29,18 +28,14 @@ export class Chat implements OnDestroy {
   }
 
   disconnect(): void {
-    this.intentionalDisconnect = true;
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
-    }
-    this.ws?.close();
-    this.ws = null;
+    this.clearReconnect();
+    this.closeWs();
+    this.connected$.next(false);
   }
 
   async getRooms(): Promise<string[]> {
     try {
-      const res = await fetch(`${environment.wsUrl.replace('ws', 'http')}/rooms`);
+      const res = await fetch(`${environment.wsUrl.replace('wss', 'https').replace('ws', 'http')}/rooms`);
       const data = await res.json();
       return data.rooms ?? [];
     } catch {
@@ -49,23 +44,45 @@ export class Chat implements OnDestroy {
   }
 
   private openConnection(): void {
-    this.ws = new WebSocket(`${environment.wsUrl}/ws/${this.room}/${this.username}`);
+    const ws = new WebSocket(`${environment.wsUrl}/ws/${this.room}/${this.username}`);
 
-    this.ws.onopen = () => this.connected$.next(true);
+    ws.onopen = () => {
+      this.ws = ws;
+      this.connected$.next(true);
+    };
 
-    this.ws.onmessage = (event: MessageEvent) => {
+    ws.onmessage = (event: MessageEvent) => {
+      if (this.ws !== ws) return;
       const msg: Message = JSON.parse(event.data);
       this.messages$.next(msg);
     };
 
-    this.ws.onclose = () => {
+    ws.onclose = () => {
+      if (this.ws !== ws) return;
       this.connected$.next(false);
-      if (!this.intentionalDisconnect) {
-        this.reconnectTimer = setTimeout(() => this.openConnection(), 3000);
-      }
+      this.reconnectTimer = setTimeout(() => this.openConnection(), 3000);
     };
 
-    this.ws.onerror = () => this.ws?.close();
+    ws.onerror = () => ws.close();
+  }
+
+  private closeWs(): void {
+    if (this.ws) {
+      const old = this.ws;
+      this.ws = null;
+      old.onopen = null;
+      old.onmessage = null;
+      old.onclose = null;
+      old.onerror = null;
+      old.close();
+    }
+  }
+
+  private clearReconnect(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
   }
 
   ngOnDestroy(): void {

@@ -70,6 +70,24 @@
   font-size: 1.1rem;
   color: var(--gold);
   letter-spacing: 1px;
+  flex: 1;
+}
+
+.btn-leave {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  color: #c47a7a;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.btn-leave:hover {
+  background: rgba(139,26,26,0.2);
+  color: #e57373;
 }
 
 .status {

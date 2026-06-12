@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +26,7 @@ export class ChatRoom implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private chatService: Chat
   ) {}
 
@@ -69,6 +70,11 @@ export class ChatRoom implements OnInit, OnDestroy {
       this.chatService.send(trimmed);
       this.newMessage = '';
     }
+  }
+
+  leave(): void {
+    this.chatService.disconnect();
+    this.router.navigate(['/']);
   }
 
   ngOnDestroy(): void {
