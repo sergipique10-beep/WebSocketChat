@@ -5,11 +5,12 @@ import { db } from '../../firebase.config';
 @Injectable({ providedIn: 'root' })
 export class RegistrationService {
   async register(name: string, email: string, room: string): Promise<void> {
-    await addDoc(collection(db, 'registrations'), {
-      name,
-      email,
-      room,
-      timestamp: serverTimestamp()
-    });
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Tiempo de conexión agotado')), 8000)
+    );
+    await Promise.race([
+      addDoc(collection(db, 'registrations'), { name, email, room, timestamp: serverTimestamp() }),
+      timeout
+    ]);
   }
 }
