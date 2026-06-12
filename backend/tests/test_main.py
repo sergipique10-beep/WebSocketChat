@@ -1,6 +1,6 @@
 import json
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
