@@ -6,7 +6,7 @@
         class="room-btn"
         [class.active]="room === currentRoom()"
         (click)="switchRoom(room)"
-      >#{{ room }}</button>
+      >{{ room }}</button>
     }
     @if (availableRooms().length === 0) {
       <p class="no-rooms">Sin salas activas</p>
@@ -15,7 +15,7 @@
 
   <div class="chat-container">
     <div class="chat-header">
-      <span class="room-name">#{{ currentRoom() }}</span>
+      <span class="room-name">{{ currentRoom() }}</span>
       <span class="status" [class.connected]="isConnected()" [class.disconnected]="!isConnected()">
         {{ isConnected() ? '● Conectado' : '○ Reconectando...' }}
       </span>
