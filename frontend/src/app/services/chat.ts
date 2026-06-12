@@ -12,6 +12,7 @@ export class Chat implements OnDestroy {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   connect(username: string): void {
+    this.disconnect();
     this.username = username;
     this.openConnection();
   }
