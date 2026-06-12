@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -13,12 +13,12 @@ import { Message } from '../../models/message.model';
   templateUrl: './chat-room.html',
 })
 export class ChatRoom implements OnInit, OnDestroy {
-  messages: Message[] = [];
+  messages = signal<Message[]>([]);
   newMessage = '';
   username = '';
-  currentRoom = '';
-  isConnected = false;
-  availableRooms: string[] = [];
+  currentRoom = signal('');
+  isConnected = signal(false);
+  availableRooms = signal<string[]>([]);
 
   private subs = new Subscription();
   private pollInterval: ReturnType<typeof setInterval> | null = null;
@@ -30,27 +30,27 @@ export class ChatRoom implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.username = this.route.snapshot.queryParams['username'] || 'Anónimo';
-    this.currentRoom = this.route.snapshot.queryParams['room'] || 'General';
-    this.joinRoom(this.currentRoom);
+    this.currentRoom.set(this.route.snapshot.queryParams['room'] || 'General');
+    this.joinRoom(this.currentRoom());
     this.pollRooms();
     this.pollInterval = setInterval(() => this.pollRooms(), 5000);
   }
 
   private joinRoom(room: string): void {
-    this.messages = [];
-    this.currentRoom = room;
+    this.messages.set([]);
+    this.currentRoom.set(room);
     this.chatService.connect(this.username, room);
 
     this.subs.add(
-      this.chatService.messages$.subscribe((msg) => this.messages.push(msg))
+      this.chatService.messages$.subscribe((msg) => this.messages.update(msgs => [...msgs, msg]))
     );
     this.subs.add(
-      this.chatService.connected$.subscribe((status) => (this.isConnected = status))
+      this.chatService.connected$.subscribe((status) => this.isConnected.set(status))
     );
   }
 
   switchRoom(room: string): void {
-    if (room === this.currentRoom) return;
+    if (room === this.currentRoom()) return;
     this.subs.unsubscribe();
     this.subs = new Subscription();
     this.joinRoom(room);
@@ -58,8 +58,8 @@ export class ChatRoom implements OnInit, OnDestroy {
 
   private async pollRooms(): Promise<void> {
     const rooms = await this.chatService.getRooms();
-    const combined = new Set([...rooms, this.currentRoom]);
-    this.availableRooms = Array.from(combined);
+    const combined = new Set([...rooms, this.currentRoom()]);
+    this.availableRooms.set(Array.from(combined));
   }
 
   sendMessage(): void {
