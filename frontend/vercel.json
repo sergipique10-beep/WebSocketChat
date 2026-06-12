@@ -1,6 +1,6 @@
 {
   "framework": null,
   "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist/frontend",
+  "outputDirectory": "dist/frontend/browser",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
