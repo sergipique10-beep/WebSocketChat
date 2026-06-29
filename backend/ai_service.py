@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from openai import AsyncOpenAI
 
 load_dotenv()
 
@@ -70,7 +69,7 @@ Estima el número contando aproximadamente 4 caracteres por token en tu respuest
 """
 
 _HISTORY_LIMIT = 50
-_MODEL = "gemini-1.5-flash"
+_MODEL = "google/gemini-2.0-flash-exp:free"
 
 
 class RoomHistory:
@@ -82,27 +81,27 @@ class RoomHistory:
         if len(self._messages) > _HISTORY_LIMIT:
             self._messages = self._messages[-_HISTORY_LIMIT:]
 
-    def add_model(self, text: str) -> None:
-        self._messages.append({"role": "model", "content": text})
+    def add_assistant(self, text: str) -> None:
+        self._messages.append({"role": "assistant", "content": text})
         if len(self._messages) > _HISTORY_LIMIT:
             self._messages = self._messages[-_HISTORY_LIMIT:]
 
-    def get_contents(self) -> list[types.Content]:
+    def get_messages(self) -> list[dict]:
         merged: list[dict] = []
         for msg in self._messages:
             if merged and merged[-1]["role"] == msg["role"]:
                 merged[-1] = {"role": msg["role"], "content": merged[-1]["content"] + "\n" + msg["content"]}
             else:
                 merged.append(dict(msg))
-        return [
-            types.Content(role=m["role"], parts=[types.Part(text=m["content"])])
-            for m in merged
-        ]
+        return merged
 
 
 class AIService:
     def __init__(self) -> None:
-        self._client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        self._client = AsyncOpenAI(
+            api_key=os.environ["OPENROUTER_API_KEY"],
+            base_url="https://openrouter.ai/api/v1",
+        )
         self._histories: dict[str, RoomHistory] = {}
 
     def _room(self, room: str) -> RoomHistory:
@@ -115,13 +114,10 @@ class AIService:
 
     async def respond(self, room: str) -> str:
         history = self._room(room)
-        response = await self._client.aio.models.generate_content(
+        response = await self._client.chat.completions.create(
             model=_MODEL,
-            contents=history.get_contents(),
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-            ),
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + history.get_messages(),
         )
-        text = response.text
-        history.add_model(text)
+        text = response.choices[0].message.content
+        history.add_assistant(text)
         return text
