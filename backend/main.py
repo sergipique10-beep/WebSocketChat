@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from manager import RoomManager
+from ai_service import AIService
 
 app = FastAPI()
 
@@ -23,6 +24,7 @@ app.add_middleware(
 )
 
 manager = RoomManager()
+ai = AIService()
 
 
 @app.get("/health")
@@ -51,6 +53,17 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
                 "message": data,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }))
+            ai.record_user(room, username, data)
+            if "@ia" in data.lower():
+                try:
+                    reply = await ai.respond(room)
+                except Exception as exc:
+                    reply = f"Error al contactar la IA: {exc}"
+                await manager.broadcast(room, json.dumps({
+                    "username": "IA",
+                    "message": reply,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }))
     except WebSocketDisconnect:
         manager.disconnect(room, websocket)
         await manager.broadcast(room, json.dumps({

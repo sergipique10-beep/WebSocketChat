@@ -7,6 +7,6 @@ export class RegistrationService {
     const { error } = await supabase
       .from('registrations')
       .insert({ name, email, room });
-    if (error) throw new Error(error.message);
+    if (error) console.warn('Registration skipped:', error.message);
   }
 }
