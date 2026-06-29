@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,10 @@ import { Chat } from '../../services/chat';
 export class ChatRoom implements OnInit, OnDestroy {
   newMessage = '';
   username = '';
+
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  readonly chatService = inject(Chat);
 
   private pollInterval: ReturnType<typeof setInterval> | null = null;
   private allRooms = signal<string[]>([]);
@@ -35,11 +39,7 @@ export class ChatRoom implements OnInit, OnDestroy {
     delay: -(Math.random() * 10)
   }));
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    readonly chatService: Chat
-  ) {}
+  constructor() {}
 
   ngOnInit(): void {
     this.username = this.route.snapshot.queryParams['username'] || 'Anónimo';

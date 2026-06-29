@@ -16,17 +16,35 @@
       </span>
     }
   </div>
+
   <aside class="sidebar">
-    <h2>Salas</h2>
-    @for (room of availableRooms(); track room) {
-      <button
-        class="room-btn"
-        [class.active]="room === currentRoom()"
-        (click)="switchRoom(room)"
-      >{{ room }}</button>
-    }
-    @if (availableRooms().length === 0) {
-      <p class="no-rooms">Sin salas activas</p>
+    <!-- Mis Salas -->
+    <div class="sidebar-section">
+      <h2>Mis Salas</h2>
+      @for (room of joinedRooms(); track room) {
+        <div class="room-row" [class.active]="room === currentRoom()">
+          <button class="room-btn" (click)="switchRoom(room)">
+            {{ room }}
+            @if (unreadFor(room) > 0) {
+              <span class="badge">{{ unreadFor(room) }}</span>
+            }
+          </button>
+          <button class="room-leave-btn" (click)="leaveRoom(room)" title="Salir de sala">✕</button>
+        </div>
+      }
+    </div>
+
+    <!-- Salas Disponibles -->
+    @if (availableRooms().length > 0) {
+      <div class="sidebar-section">
+        <h2>Disponibles</h2>
+        @for (room of availableRooms(); track room) {
+          <div class="room-row">
+            <span class="room-label">{{ room }}</span>
+            <button class="room-join-btn" (click)="joinRoom(room)" title="Unirse">+</button>
+          </div>
+        }
+      </div>
     }
   </aside>
 
@@ -36,12 +54,14 @@
       <span class="status" [class.connected]="isConnected()" [class.disconnected]="!isConnected()">
         {{ isConnected() ? '● ON' : '○ OFF' }}
       </span>
-      <button class="btn-leave" (click)="leave()">Abandonar</button>
+      <button class="btn-leave" (click)="leave()">Salir</button>
     </div>
 
     <div class="messages">
       @for (msg of messages(); track msg.timestamp) {
-        <div class="message" [class.own]="msg.username === username" [class.system]="msg.username === 'Sistema'">
+        <div class="message"
+          [class.own]="msg.username === username"
+          [class.system]="msg.username === 'Sistema'">
           <span class="author">{{ msg.username }}</span>
           <span class="text">{{ msg.message }}</span>
           <span class="time">{{ msg.timestamp | date:'HH:mm' }}</span>
