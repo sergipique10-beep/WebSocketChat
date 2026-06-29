@@ -69,7 +69,7 @@ Estima el número contando aproximadamente 4 caracteres por token en tu respuest
 """
 
 _HISTORY_LIMIT = 50
-_MODEL = "google/gemini-2.5-flash:free"
+_MODEL = "grok-3-mini"
 
 
 class RoomHistory:
@@ -99,8 +99,8 @@ class RoomHistory:
 class AIService:
     def __init__(self) -> None:
         self._client = AsyncOpenAI(
-            api_key=os.environ["OPENROUTER_API_KEY"],
-            base_url="https://openrouter.ai/api/v1",
+            api_key=os.environ["GROK_API_KEY"],
+            base_url="https://api.x.ai/v1",
         )
         self._histories: dict[str, RoomHistory] = {}
 
