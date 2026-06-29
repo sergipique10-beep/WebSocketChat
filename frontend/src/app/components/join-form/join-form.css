@@ -5,7 +5,7 @@
   justify-content: center;
   padding: 24px 16px;
   position: relative;
-  background-image: url('/assets/rivendell.jpg');
+  background-image: url('/assets/sara-lazzeroni-rivendell-4k.jpg');
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -17,9 +17,9 @@
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(5,8,12,0.45) 0%,
-    rgba(8,14,10,0.35) 50%,
-    rgba(5,8,12,0.6) 100%
+    rgba(5,8,12,0.2) 0%,
+    rgba(8,14,10,0.15) 50%,
+    rgba(5,8,12,0.3) 100%
   );
   pointer-events: none;
   z-index: 0;
