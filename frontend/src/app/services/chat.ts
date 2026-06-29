@@ -18,14 +18,19 @@ export class Chat implements OnDestroy {
   readonly activeRoom = signal<string>('');
   readonly joinedRooms = signal<string[]>([]);
 
+  // activeMessages and activeConnected read joinedRooms() solely to register a
+  // signal dependency. Every onmessage/onopen/onclose handler calls
+  // joinedRooms.update() which invalidates these computed signals, causing the
+  // template to re-render. If that update call is ever removed from the WS
+  // handlers, both signals will silently stop updating — keep them in sync.
   readonly activeMessages = computed<Message[]>(() => {
-    this.joinedRooms(); // declares dependency so new messages trigger re-evaluation
+    this.joinedRooms();
     const state = this.pool.get(this.activeRoom());
     return state ? [...state.messages] : [];
   });
 
   readonly activeConnected = computed<boolean>(() => {
-    this.joinedRooms(); // declares dependency so reconnects trigger re-evaluation
+    this.joinedRooms();
     return this.pool.get(this.activeRoom())?.connected ?? false;
   });
 
