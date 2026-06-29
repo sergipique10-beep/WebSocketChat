@@ -4,9 +4,35 @@
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
+  position: relative;
 }
 
-.register-card { width: 100%; max-width: 520px; }
+.ember-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ember {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: rise linear infinite;
+  filter: blur(0.6px);
+  box-shadow: 0 0 4px currentColor;
+}
+
+@keyframes rise {
+  0%   { transform: translateY(0) scale(1);    opacity: 0; }
+  10%  { opacity: 0.85; }
+  80%  { opacity: 0.4; }
+  100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+}
+
+.register-card { position: relative; z-index: 1; width: 100%; max-width: 520px; }
 
 .rune-border {
   border: 1px solid var(--gold-dim);

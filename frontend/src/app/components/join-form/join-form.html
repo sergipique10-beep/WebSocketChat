@@ -1,4 +1,16 @@
 <div class="lotr-bg">
+  <div class="ember-bg">
+    @for (e of embers; track $index) {
+      <span class="ember"
+        [style.left.%]="e.x"
+        [style.width.px]="e.size"
+        [style.height.px]="e.size"
+        [style.animationDuration.s]="e.duration"
+        [style.animationDelay.s]="e.delay"
+        [style.background]="e.color">
+      </span>
+    }
+  </div>
   <div class="register-card">
 
     <div class="rune-border">

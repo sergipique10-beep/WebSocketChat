@@ -22,6 +22,14 @@ export class JoinForm {
   loading = signal(false);
   error = signal('');
 
+  embers = Array.from({ length: 25 }, () => ({
+    x: Math.random() * 100,
+    size: 2 + Math.random() * 3,
+    duration: 4 + Math.random() * 4,
+    delay: -(Math.random() * 6),
+    color: `hsl(${10 + Math.random() * 20}, 90%, ${25 + Math.random() * 20}%)`
+  }));
+
   constructor(private router: Router, private reg: RegistrationService) {}
 
   selectRoom(aficion: string): void {
