@@ -5,47 +5,98 @@
   justify-content: center;
   padding: 24px 16px;
   position: relative;
+  background-image: url('/assets/rivendell.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
-.ember-bg {
+.lotr-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5,8,12,0.45) 0%,
+    rgba(8,14,10,0.35) 50%,
+    rgba(5,8,12,0.6) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hojas */
+.leaves-bg {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   overflow: hidden;
 }
 
-.ember {
+.leaf {
   position: absolute;
-  bottom: -10px;
-  border-radius: 50%;
-  opacity: 0;
-  animation: rise linear infinite;
-  filter: blur(0.6px);
-  box-shadow: 0 0 4px currentColor;
+  top: -30px;
+  animation: fall-leaf linear infinite;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  line-height: 1;
 }
 
-@keyframes rise {
-  0%   { transform: translateY(0) scale(1);    opacity: 0; }
-  10%  { opacity: 0.85; }
-  80%  { opacity: 0.4; }
-  100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+@keyframes fall-leaf {
+  0%   { transform: translateY(0)      translateX(0)    rotate(0deg);   opacity: 0; }
+  5%   { opacity: 1; }
+  90%  { opacity: 0.8; }
+  100% { transform: translateY(105vh)  translateX(80px) rotate(360deg); opacity: 0; }
 }
 
-.register-card { position: relative; z-index: 1; width: 100%; max-width: 520px; }
+/* Pájaros */
+.birds-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.bird-group {
+  position: absolute;
+  left: -120px;
+  display: flex;
+  align-items: center;
+  animation: fly-across linear infinite;
+}
+
+.bird {
+  display: inline-block;
+  opacity: 0.75;
+  animation: flap 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes fly-across {
+  from { transform: translateX(0) scaleX(1); }
+  to   { transform: translateX(calc(100vw + 200px)) scaleX(1); }
+}
+
+@keyframes flap {
+  from { transform: scaleY(1); }
+  to   { transform: scaleY(-0.4); }
+}
+
+.register-card { position: relative; z-index: 2; width: 100%; max-width: 520px; }
 
 .rune-border {
   border: 1px solid var(--gold-dim);
   border-radius: 8px;
   padding: 3px;
-  background: linear-gradient(135deg, rgba(201,168,76,0.15), transparent 50%, rgba(201,168,76,0.08));
-  box-shadow: 0 0 40px rgba(201,168,76,0.1), 0 0 80px rgba(139,26,26,0.08), inset 0 0 20px rgba(0,0,0,0.4);
+  background: linear-gradient(135deg, rgba(201,168,76,0.2), transparent 50%, rgba(201,168,76,0.1));
+  box-shadow: 0 0 60px rgba(201,168,76,0.15), 0 0 100px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.4);
 }
 
 .card-inner {
-  background: var(--surface);
+  background: rgba(17,14,26,0.88);
   border-radius: 6px;
   padding: 36px 32px;
+  backdrop-filter: blur(6px);
 }
 
 .header { text-align: center; margin-bottom: 20px; }

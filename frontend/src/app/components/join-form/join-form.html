@@ -1,18 +1,39 @@
 <div class="lotr-bg">
-  <div class="ember-bg">
-    @for (e of embers; track $index) {
-      <span class="ember"
-        [style.left.%]="e.x"
-        [style.width.px]="e.size"
-        [style.height.px]="e.size"
-        [style.animationDuration.s]="e.duration"
-        [style.animationDelay.s]="e.delay"
-        [style.background]="e.color">
+
+  <!-- Hojas cayendo -->
+  <div class="leaves-bg">
+    @for (l of leaves; track $index) {
+      <span class="leaf"
+        [style.left.%]="l.x"
+        [style.fontSize.px]="l.size"
+        [style.animationDuration.s]="l.duration"
+        [style.animationDelay.s]="l.delay"
+        [style.opacity]="l.opacity"
+        [style.color]="l.color">
+        {{ l.shape }}
       </span>
     }
   </div>
-  <div class="register-card">
 
+  <!-- Pájaros -->
+  <div class="birds-bg">
+    @for (g of birdGroups; track $index) {
+      <div class="bird-group"
+        [style.top.%]="g.top"
+        [style.animationDuration.s]="g.duration"
+        [style.animationDelay.s]="g.delay"
+        [style.transform]="'scale(' + g.scale + ')'">
+        @for (b of g.birds; track $index) {
+          <svg class="bird" [style.marginLeft.px]="b.offsetX" [style.marginTop.px]="b.offsetY"
+            viewBox="0 0 40 20" width="18" height="9">
+            <path d="M0,10 Q10,0 20,10 Q30,0 40,10" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="register-card">
     <div class="rune-border">
       <div class="card-inner">
         <div class="header">
@@ -66,6 +87,5 @@
         </form>
       </div>
     </div>
-
   </div>
 </div>

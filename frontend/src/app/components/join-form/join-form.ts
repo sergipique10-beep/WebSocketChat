@@ -22,12 +22,25 @@ export class JoinForm {
   loading = signal(false);
   error = signal('');
 
-  embers = Array.from({ length: 25 }, () => ({
-    x: Math.random() * 100,
-    size: 2 + Math.random() * 3,
-    duration: 4 + Math.random() * 4,
-    delay: -(Math.random() * 6),
-    color: `hsl(${10 + Math.random() * 20}, 90%, ${25 + Math.random() * 20}%)`
+  leaves = Array.from({ length: 22 }, () => ({
+    x: Math.random() * 110 - 5,
+    size: 10 + Math.random() * 14,
+    duration: 8 + Math.random() * 10,
+    delay: -(Math.random() * 15),
+    opacity: 0.55 + Math.random() * 0.35,
+    color: ['#6b8c3a','#8b6914','#5a7a2a','#a07828','#3d5c1e','#7a5010'][Math.floor(Math.random()*6)],
+    shape: ['🍃','🍂','🍁'][Math.floor(Math.random()*3)]
+  }));
+
+  birdGroups = Array.from({ length: 6 }, () => ({
+    top: 5 + Math.random() * 40,
+    duration: 18 + Math.random() * 20,
+    delay: -(Math.random() * 30),
+    scale: 0.5 + Math.random() * 0.8,
+    birds: Array.from({ length: 2 + Math.floor(Math.random() * 4) }, () => ({
+      offsetX: Math.random() * 30 - 15,
+      offsetY: Math.random() * 14 - 7
+    }))
   }));
 
   constructor(private router: Router, private reg: RegistrationService) {}
