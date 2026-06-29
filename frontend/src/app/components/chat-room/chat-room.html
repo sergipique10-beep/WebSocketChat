@@ -4,6 +4,18 @@
     <div class="aurora a2"></div>
     <div class="aurora a3"></div>
   </div>
+  <div class="particles-bg">
+    @for (p of particles; track $index) {
+      <span class="particle"
+        [style.left.%]="p.x"
+        [style.top.%]="p.y"
+        [style.width.px]="p.size"
+        [style.height.px]="p.size"
+        [style.animationDuration.s]="p.duration"
+        [style.animationDelay.s]="p.delay">
+      </span>
+    }
+  </div>
   <aside class="sidebar">
     <h2>Salas</h2>
     @for (room of availableRooms(); track room) {
@@ -22,7 +34,7 @@
     <div class="chat-header">
       <span class="room-name">{{ currentRoom() }}</span>
       <span class="status" [class.connected]="isConnected()" [class.disconnected]="!isConnected()">
-        {{ isConnected() ? '● Conectado' : '○ Reconectando...' }}
+        {{ isConnected() ? '● ON' : '○ OFF' }}
       </span>
       <button class="btn-leave" (click)="leave()">Abandonar</button>
     </div>
