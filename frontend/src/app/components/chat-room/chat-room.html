@@ -46,6 +46,22 @@
         }
       </div>
     }
+
+    <!-- Unirse a sala personalizada -->
+    <div class="sidebar-section join-custom">
+      <h2>Nueva Sala</h2>
+      <form class="join-form" (ngSubmit)="joinCustomRoom()">
+        <input
+          class="join-input"
+          type="text"
+          [(ngModel)]="customRoomInput"
+          name="customRoom"
+          placeholder="Nombre de sala..."
+          autocomplete="off"
+        />
+        <button class="room-join-btn" type="submit" [disabled]="!customRoomInput.trim()" title="Unirse">+</button>
+      </form>
+    </div>
   </aside>
 
   <div class="chat-container">
