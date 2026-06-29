@@ -70,7 +70,7 @@ Estima el número contando aproximadamente 4 caracteres por token en tu respuest
 """
 
 _HISTORY_LIMIT = 50
-_MODEL = "gemini-2.0-flash"
+_MODEL = "gemini-1.5-flash"
 
 
 class RoomHistory:
