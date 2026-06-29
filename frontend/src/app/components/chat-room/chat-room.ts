@@ -1,10 +1,8 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Chat } from '../../services/chat';
-import { Message } from '../../models/message.model';
 
 @Component({
   selector: 'app-chat-room',
@@ -14,12 +12,20 @@ import { Message } from '../../models/message.model';
   styleUrl: './chat-room.css'
 })
 export class ChatRoom implements OnInit, OnDestroy {
-  messages = signal<Message[]>([]);
   newMessage = '';
   username = '';
-  currentRoom = signal('');
-  isConnected = signal(false);
-  availableRooms = signal<string[]>([]);
+
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private allRooms = signal<string[]>([]);
+
+  readonly currentRoom = this.chatService.activeRoom;
+  readonly isConnected = this.chatService.activeConnected;
+  readonly messages = this.chatService.activeMessages;
+  readonly joinedRooms = this.chatService.joinedRooms;
+
+  readonly availableRooms = computed(() =>
+    this.allRooms().filter(r => !this.chatService.joinedRooms().includes(r))
+  );
 
   particles = Array.from({ length: 40 }, () => ({
     x: Math.random() * 100,
@@ -29,47 +35,37 @@ export class ChatRoom implements OnInit, OnDestroy {
     delay: -(Math.random() * 10)
   }));
 
-  private subs = new Subscription();
-  private pollInterval: ReturnType<typeof setInterval> | null = null;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private chatService: Chat
+    readonly chatService: Chat
   ) {}
 
   ngOnInit(): void {
     this.username = this.route.snapshot.queryParams['username'] || 'Anónimo';
-    this.currentRoom.set(this.route.snapshot.queryParams['room'] || 'General');
-    this.joinRoom(this.currentRoom());
+    const room = this.route.snapshot.queryParams['room'] || 'General';
+    this.chatService.joinRoom(this.username, room);
     this.pollRooms();
     this.pollInterval = setInterval(() => this.pollRooms(), 5000);
   }
 
-  private joinRoom(room: string): void {
-    this.messages.set([]);
-    this.currentRoom.set(room);
-    this.chatService.connect(this.username, room);
+  joinRoom(room: string): void {
+    this.chatService.joinRoom(this.username, room);
+  }
 
-    this.subs.add(
-      this.chatService.messages$.subscribe((msg) => this.messages.update(msgs => [...msgs, msg]))
-    );
-    this.subs.add(
-      this.chatService.connected$.subscribe((status) => this.isConnected.set(status))
-    );
+  leaveRoom(room: string): void {
+    this.chatService.leaveRoom(room);
+    if (this.chatService.joinedRooms().length === 0) {
+      this.router.navigate(['/']);
+    }
   }
 
   switchRoom(room: string): void {
-    if (room === this.currentRoom()) return;
-    this.subs.unsubscribe();
-    this.subs = new Subscription();
-    this.joinRoom(room);
+    this.chatService.setActiveRoom(room);
   }
 
-  private async pollRooms(): Promise<void> {
-    const rooms = await this.chatService.getRooms();
-    const combined = new Set([...rooms, this.currentRoom()]);
-    this.availableRooms.set(Array.from(combined));
+  unreadFor(room: string): number {
+    return this.chatService.unreadFor(room);
   }
 
   sendMessage(): void {
@@ -81,13 +77,18 @@ export class ChatRoom implements OnInit, OnDestroy {
   }
 
   leave(): void {
-    this.chatService.disconnect();
+    this.chatService.leaveAll();
     this.router.navigate(['/']);
+  }
+
+  private async pollRooms(): Promise<void> {
+    const rooms = await this.chatService.getRooms();
+    const joined = this.chatService.joinedRooms();
+    const combined = new Set([...rooms, ...joined]);
+    this.allRooms.set(Array.from(combined));
   }
 
   ngOnDestroy(): void {
     if (this.pollInterval) clearInterval(this.pollInterval);
-    this.subs.unsubscribe();
-    this.chatService.disconnect();
   }
 }
