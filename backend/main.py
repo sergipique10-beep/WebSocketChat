@@ -3,6 +3,8 @@ import os
 from datetime import datetime, timezone
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from manager import RoomManager
 
 app = FastAPI()
@@ -56,3 +58,8 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
             "message": f"{username} abandonó #{room}.",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }))
+
+
+_static_dir = os.getenv("STATIC_DIR", "../frontend/dist/frontend/browser")
+if os.path.isdir(_static_dir):
+    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
