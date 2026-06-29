@@ -25,7 +25,7 @@ app.add_middleware(
 manager = RoomManager()
 
 
-@app.get("/")
+@app.get("/health")
 async def health():
     return {"status": "ok"}
 
