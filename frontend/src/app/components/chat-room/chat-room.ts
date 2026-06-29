@@ -21,12 +21,12 @@ export class ChatRoom implements OnInit, OnDestroy {
   isConnected = signal(false);
   availableRooms = signal<string[]>([]);
 
-  particles = Array.from({ length: 35 }, () => ({
+  particles = Array.from({ length: 40 }, () => ({
     x: Math.random() * 100,
     y: Math.random() * 100,
-    size: 1 + Math.random() * 2.5,
-    duration: 6 + Math.random() * 10,
-    delay: -(Math.random() * 12)
+    size: 3 + Math.random() * 5,
+    duration: 4 + Math.random() * 7,
+    delay: -(Math.random() * 10)
   }));
 
   private subs = new Subscription();
