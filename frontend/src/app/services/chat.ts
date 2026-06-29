@@ -1,41 +1,98 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Injectable, OnDestroy, signal, computed } from '@angular/core';
 import { Message } from '../models/message.model';
 import { environment } from '../../environments/environment';
 
+interface RoomState {
+  ws: WebSocket | null;
+  messages: Message[];
+  unread: number;
+  connected: boolean;
+  reconnectTimer: ReturnType<typeof setTimeout> | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class Chat implements OnDestroy {
-  messages$ = new Subject<Message>();
-  connected$ = new BehaviorSubject<boolean>(false);
-
-  private ws: WebSocket | null = null;
+  private pool = new Map<string, RoomState>();
   private username = '';
-  private room = '';
-  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-  connect(username: string, room: string): void {
-    this.clearReconnect();
-    this.closeWs();
-    this.username = username;
-    this.room = room;
-    this.openConnection();
+  readonly activeRoom = signal<string>('');
+  readonly joinedRooms = signal<string[]>([]);
+
+  readonly activeMessages = computed<Message[]>(() => {
+    this.joinedRooms(); // declares dependency so new messages trigger re-evaluation
+    const state = this.pool.get(this.activeRoom());
+    return state ? [...state.messages] : [];
+  });
+
+  readonly activeConnected = computed<boolean>(() => {
+    this.joinedRooms(); // declares dependency so reconnects trigger re-evaluation
+    return this.pool.get(this.activeRoom())?.connected ?? false;
+  });
+
+  unreadFor(room: string): number {
+    return this.pool.get(room)?.unread ?? 0;
   }
 
-  send(message: string): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(message);
+  joinRoom(username: string, room: string): void {
+    this.username = username;
+    if (this.pool.has(room)) {
+      this.setActiveRoom(room);
+      return;
+    }
+    const state: RoomState = {
+      ws: null,
+      messages: [],
+      unread: 0,
+      connected: false,
+      reconnectTimer: null
+    };
+    this.pool.set(room, state);
+    this.joinedRooms.update(rooms => [...rooms, room]);
+    this.openConnection(room);
+    this.setActiveRoom(room);
+  }
+
+  leaveRoom(room: string): void {
+    const state = this.pool.get(room);
+    if (!state) return;
+    this.closeRoomWs(room, state);
+    this.pool.delete(room);
+    const remaining = this.joinedRooms().filter(r => r !== room);
+    this.joinedRooms.set(remaining);
+    if (this.activeRoom() === room) {
+      this.activeRoom.set(remaining[0] ?? '');
     }
   }
 
-  disconnect(): void {
-    this.clearReconnect();
-    this.closeWs();
-    this.connected$.next(false);
+  setActiveRoom(room: string): void {
+    this.activeRoom.set(room);
+    const state = this.pool.get(room);
+    if (state) {
+      state.unread = 0;
+      this.joinedRooms.update(r => [...r]); // trigger signal refresh for badges
+    }
+  }
+
+  send(message: string): void {
+    const state = this.pool.get(this.activeRoom());
+    if (state?.ws?.readyState === WebSocket.OPEN) {
+      state.ws.send(message);
+    }
+  }
+
+  leaveAll(): void {
+    for (const [room, state] of this.pool.entries()) {
+      this.closeRoomWs(room, state);
+    }
+    this.pool.clear();
+    this.joinedRooms.set([]);
+    this.activeRoom.set('');
   }
 
   async getRooms(): Promise<string[]> {
     try {
-      const res = await fetch(`${environment.wsUrl.replace('wss', 'https').replace('ws', 'http')}/rooms`);
+      const base = environment.wsUrl.replace('wss://', 'https://').replace('ws://', 'http://');
+      const res = await fetch(`${base}/rooms`);
       const data = await res.json();
       return data.rooms ?? [];
     } catch {
@@ -43,49 +100,56 @@ export class Chat implements OnDestroy {
     }
   }
 
-  private openConnection(): void {
-    const ws = new WebSocket(`${environment.wsUrl}/ws/${this.room}/${this.username}`);
+  private openConnection(room: string): void {
+    const state = this.pool.get(room);
+    if (!state) return;
+    const ws = new WebSocket(`${environment.wsUrl}/ws/${room}/${this.username}`);
 
     ws.onopen = () => {
-      this.ws = ws;
-      this.connected$.next(true);
+      if (!this.pool.has(room)) { ws.close(); return; }
+      state.ws = ws;
+      state.connected = true;
+      if (this.activeRoom() === room) this.joinedRooms.update(r => [...r]);
     };
 
     ws.onmessage = (event: MessageEvent) => {
-      if (this.ws !== ws) return;
+      if (!this.pool.has(room) || state.ws !== ws) return;
       const msg: Message = JSON.parse(event.data);
-      this.messages$.next(msg);
+      state.messages.push(msg);
+      if (this.activeRoom() !== room) {
+        state.unread++;
+      }
+      this.joinedRooms.update(r => [...r]); // refresh signals
     };
 
     ws.onclose = () => {
-      if (this.ws !== ws) return;
-      this.connected$.next(false);
-      this.reconnectTimer = setTimeout(() => this.openConnection(), 3000);
+      if (!this.pool.has(room) || state.ws !== ws) return;
+      state.connected = false;
+      state.ws = null;
+      this.joinedRooms.update(r => [...r]);
+      state.reconnectTimer = setTimeout(() => this.openConnection(room), 3000);
     };
 
     ws.onerror = () => ws.close();
   }
 
-  private closeWs(): void {
-    if (this.ws) {
-      const old = this.ws;
-      this.ws = null;
-      old.onopen = null;
-      old.onmessage = null;
-      old.onclose = null;
-      old.onerror = null;
-      old.close();
+  private closeRoomWs(_room: string, state: RoomState): void {
+    if (state.reconnectTimer) {
+      clearTimeout(state.reconnectTimer);
+      state.reconnectTimer = null;
     }
-  }
-
-  private clearReconnect(): void {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
+    if (state.ws) {
+      const ws = state.ws;
+      state.ws = null;
+      ws.onopen = null;
+      ws.onmessage = null;
+      ws.onclose = null;
+      ws.onerror = null;
+      ws.close();
     }
   }
 
   ngOnDestroy(): void {
-    this.disconnect();
+    this.leaveAll();
   }
 }
