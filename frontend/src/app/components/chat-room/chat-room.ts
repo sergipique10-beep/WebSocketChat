@@ -13,6 +13,7 @@ import { Chat } from '../../services/chat';
 })
 export class ChatRoom implements OnInit, OnDestroy {
   newMessage = '';
+  customRoomInput = '';
   username = '';
 
   private route = inject(ActivatedRoute);
@@ -73,6 +74,14 @@ export class ChatRoom implements OnInit, OnDestroy {
     if (trimmed) {
       this.chatService.send(trimmed);
       this.newMessage = '';
+    }
+  }
+
+  joinCustomRoom(): void {
+    const room = this.customRoomInput.trim();
+    if (room) {
+      this.chatService.joinRoom(this.username, room);
+      this.customRoomInput = '';
     }
   }
 
